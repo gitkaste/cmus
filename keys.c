@@ -38,6 +38,7 @@ const char * const key_context_names[NR_CTXS + 1] = {
 	"library",
 	"playlist",
 	"queue",
+	"lyrics",
 	"settings",
 	NULL
 };
@@ -51,6 +52,7 @@ static const enum key_context view_to_context[] = {
 	CTX_QUEUE,
 	CTX_BROWSER,
 	CTX_FILTERS,
+	CTX_LYRICS,
 	CTX_SETTINGS,
 };
 
