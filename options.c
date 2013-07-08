@@ -56,6 +56,7 @@
 /* initialized option variables */
 
 char *cdda_device = NULL;
+char *lyrics_cmd = NULL;
 char *output_plugin = NULL;
 char *status_display_program = NULL;
 char *server_password;
@@ -211,6 +212,21 @@ static void set_device(unsigned int id, const char *buf)
 	free(cdda_device);
 	cdda_device = expand_filename(buf);
 }
+
+static void get_lyrics_cmd(unsigned int id, char *buf)
+{
+	if (lyrics_cmd)
+		strcpy(buf, lyrics_cmd);
+}
+
+static void set_lyrics_cmd(unsigned int id, const char *buf)
+{
+	free(lyrics_cmd);
+	lyrics_cmd = NULL;
+	if(buf[0])
+		lyrics_cmd = xstrdup(buf);
+}
+
 
 #define SECOND_SIZE (44100 * 16 / 8 * 2)
 static void get_buffer_seconds(unsigned int id, char *buf)
@@ -612,7 +628,7 @@ static void toggle_confirm_run(unsigned int id)
 }
 
 const char * const view_names[NR_VIEWS + 1] = {
-	"tree", "sorted", "playlist", "queue", "browser", "filters", "settings", NULL
+	"tree", "sorted", "playlist", "queue", "browser", "filters", "lyrics", "settings", NULL
 };
 
 static void get_play_library(unsigned int id, char *buf)
@@ -1155,6 +1171,7 @@ static const struct {
 	DN(icecast_default_charset)
 	DN(lib_sort)
 	DN(output_plugin)
+	DN(lyrics_cmd)
 	DN(passwd)
 	DN(pl_sort)
 	DT(play_library)
@@ -1237,7 +1254,6 @@ static const struct {
 	{ "format_trackwin_va",	"%3n. %t (%a)%= %y %d " },
 
 	{ "lib_sort"	,	"albumartist date album discnumber tracknumber title filename" },
-	{ "lyrics_cmd"	,	"ls -al" },
 	{ "pl_sort",		"" },
 	{ "id3_default_charset","ISO-8859-1" },
 	{ "icecast_default_charset","ISO-8859-1" },
