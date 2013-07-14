@@ -44,6 +44,7 @@
 #include "keys.h"
 #include "debug.h"
 #include "help.h"
+#include "lyrics.h"
 #include "worker.h"
 #include "input.h"
 #include "file.h"
@@ -760,6 +761,32 @@ static void print_browser(struct window *win, int row, struct iter *iter)
 	}
 }
 
+static void print_lyrics(struct window *win, int row, struct iter *iter)
+{
+	char buf[256];
+	struct lyrics_entry *e = iter_to_lyrics_entry(iter);
+	struct iter sel;
+	int selected, pos;
+	int active = 1;
+  const char *e_line;
+
+	window_get_sel(win, &sel);
+	selected = iters_equal(iter, &sel);
+	bkgdset(pairs[(active << 2) | (selected << 1)]);
+
+  d_print ("e %p\n", e);
+	e_line = e->line;
+	if (!using_utf8) {
+		utf8_encode_to_buf(e_line);
+		e_line = conv_buffer;
+	}
+  snprintf(buf, sizeof(buf), "%-29s", e_line);
+	pos = format_str(print_buffer, buf, COLS - 1);
+	print_buffer[pos++] = ' ';
+	print_buffer[pos] = 0;
+	dump_print_buffer(row + 1, 0);
+}
+
 static void print_filter(struct window *win, int row, struct iter *iter)
 {
 	char buf[256];
@@ -988,6 +1015,11 @@ static void update_filters_window(void)
 	update_window(filters_win, 0, 0, COLS, "Library Filters", print_filter);
 }
 
+static void update_lyrics_window(void)
+{
+	update_window(lyrics_win, 0, 0, COLS, "Lyrics", print_lyrics);
+}
+
 static void update_help_window(void)
 {
 	update_window(help_win, 0, 0, COLS, "Settings", print_help);
@@ -1042,6 +1074,9 @@ static void do_update_view(int full)
 	case FILTERS_VIEW:
 		update_filters_window();
 		break;
+	case LYRICS_VIEW:
+    update_lyrics_window();
+    break;
 	case HELP_VIEW:
 		update_help_window();
 		break;
@@ -1582,6 +1617,9 @@ void search_not_found(void)
 		case FILTERS_VIEW:
 			what = "Filter";
 			break;
+		case LYRICS_VIEW:
+      what = "Word";
+      break;
 		case HELP_VIEW:
 			what = "Binding/command/option";
 			break;
@@ -1600,6 +1638,9 @@ void search_not_found(void)
 		case FILTERS_VIEW:
 			what = "Filter";
 			break;
+		case LYRICS_VIEW:
+      what = "Word";
+      break;
 		case HELP_VIEW:
 			what = "Binding/command/option";
 			break;
@@ -1643,6 +1684,9 @@ void set_view(int view)
 	case FILTERS_VIEW:
 		searchable = filters_searchable;
 		break;
+	case LYRICS_VIEW:
+    searchable = lyrics_searchable;
+    break;
 	case HELP_VIEW:
 		searchable = help_searchable;
 		update_help_window();
@@ -1871,6 +1915,7 @@ static void update(void)
 			window_set_nr_rows(pq_editable.win, h - 1);
 			window_set_nr_rows(filters_win, h - 1);
 			window_set_nr_rows(help_win, h - 1);
+			window_set_nr_rows(lyrics_win, h - 1);
 			window_set_nr_rows(browser_win, h - 1);
 			editable_unlock();
 			needs_title_update = 1;
@@ -1921,6 +1966,8 @@ static void update(void)
 	case FILTERS_VIEW:
 		needs_view_update += filters_win->changed;
 		break;
+	case LYRICS_VIEW:
+    needs_view_update += lyrics_win->changed;
 	case HELP_VIEW:
 		needs_view_update += help_win->changed;
 		break;
@@ -2289,6 +2336,7 @@ static void init_all(void)
 	browser_init();
 	filters_init();
 	help_init();
+	lyrics_init();
 	cmdline_init();
 	commands_init();
 	search_mode_init();
@@ -2349,6 +2397,7 @@ static void exit_all(void)
 	commands_exit();
 	search_mode_exit();
 	filters_exit();
+	lyrics_exit();
 	help_exit();
 	browser_exit();
 }
