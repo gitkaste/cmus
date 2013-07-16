@@ -176,6 +176,7 @@ static const char *interesting[] = {
 	"replaygain_album_peak",
 	"musicbrainz_trackid",
 	"comment",
+	"lyrics",
 	"arranger", "composer", "conductor", "lyricist", "performer",
 	"remixer", "label", "publisher", "work", "opus", "partnumber", "part",
 	"subtitle", "media",
