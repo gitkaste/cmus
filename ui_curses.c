@@ -2130,7 +2130,7 @@ static void main_loop(void)
 		}
 		player_info_unlock();
 
-		if (!tv.tv_usec && worker_has_job(JOB_TYPE_ANY)) {
+		if (!tv.tv_usec && worker_has_job(JOB_TYPE_ANY_SONGS)) {
 			// playlist is loading. screen needs to be updated
 			tv.tv_usec = 250e3;
 		}
@@ -2390,6 +2390,11 @@ static void exit_all(void)
 	options_exit();
 
 	server_exit();
+
+	/* cmus_exit waits for the threads to finish, unfortunately this means lyrics needs to go first
+	* least it delays the shutdown */
+	lyrics_exit();
+
 	cmus_exit();
 	if (resume_cmus)
 		cmus_save(play_queue_for_each, play_queue_autosave_filename);
@@ -2401,7 +2406,6 @@ static void exit_all(void)
 	commands_exit();
 	search_mode_exit();
 	filters_exit();
-	lyrics_exit();
 	help_exit();
 	browser_exit();
 }
